@@ -1,0 +1,55 @@
+############################
+# Visual Studio / VS Code
+############################
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+
+############################
+# Build outputs
+############################
+bin/
+obj/
+[Ll]og/
+[Tt]emp/
+*.pdb
+*.cache
+
+############################
+# Configuration & secrets
+############################
+.env
+Dockerfile.env
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.local.json
+
+############################
+# Docker
+############################
+docker-compose.override.yml
+**/docker-compose.override.yml
+**/docker-compose.debug.yml
+
+############################
+# Logs and temp
+############################
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+Thumbs.db
+*.DS_Store
+
+############################
+# Publish outputs
+############################
+wwwroot/
+publish/
+dist/
+out/
