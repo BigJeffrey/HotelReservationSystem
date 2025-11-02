@@ -24,15 +24,23 @@ namespace HotelReservationSystem.Persistence.Repositories
                 .FirstOrDefaultAsync(c => c.CustomerId == id);
         }
 
-        public async Task AddAsync(Customer customer)
+        public async Task<Customer?> GetByEmailAsync(string email)
         {
-            await _context.Customers.AddAsync(customer);
+            return await _context.Customers.FirstOrDefaultAsync(c => c.Email == email.ToLower());
         }
 
-        public async Task UpdateAsync(Customer customer)
+        public async Task<Customer> AddAsync(Customer customer)
+        {
+            customer.Email = customer.Email.ToLowerInvariant();
+            await _context.Customers.AddAsync(customer);
+            return customer;
+        }
+
+        public async Task<Customer> UpdateAsync(Customer customer)
         {
             _context.Customers.Update(customer);
             await Task.CompletedTask;
+            return customer;
         }
 
         public async Task DeleteAsync(int id)

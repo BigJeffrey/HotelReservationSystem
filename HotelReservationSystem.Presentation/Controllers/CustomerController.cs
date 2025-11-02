@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.Interfaces;
 using HotelReservationSystem.Domain.Entities;
+using HotelReservationSystem.Application.DTOs.Customers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotelReservationSystem.Presentation.Controllers
 {
@@ -31,28 +32,42 @@ namespace HotelReservationSystem.Presentation.Controllers
 
         // POST: api/customers
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Customer customer)
+        public async Task<IActionResult> Create([FromBody] CreateCustomerRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _customerService.AddCustomerAsync(customer);
-            return CreatedAtAction(nameof(GetById), new { id = customer.CustomerId }, customer);
+            try
+            { 
+                var newCustomer = await _customerService.AddCustomerAsync(request);
+                return CreatedAtAction(nameof(GetById),
+                new { id = newCustomer.CustomerId },
+                newCustomer);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         // PUT: api/customers/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Customer updatedCustomer)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCustomerRequest request)
         {
-            if (id != updatedCustomer.CustomerId)
-                return BadRequest("ID mismatch");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var updatedCustomer = await _customerService.UpdateCustomerAsync(id, request);
+                if (updatedCustomer == null)
+                    return NotFound();
 
-            var existing = await _customerService.GetCustomerByIdAsync(id);
-            if (existing == null)
-                return NotFound();
-
-            await _customerService.UpdateCustomerAsync(updatedCustomer);
-            return NoContent();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         // DELETE: api/customers/{id}

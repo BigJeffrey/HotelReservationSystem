@@ -1,4 +1,5 @@
-﻿using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.DTOs.Customers;
+using HotelReservationSystem.Application.Interfaces;
 using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.Services
@@ -22,21 +23,60 @@ namespace HotelReservationSystem.Application.Services
             return await _customerRepository.GetByIdAsync(id);
         }
 
-        public async Task AddCustomerAsync(Customer customer)
+        public async Task<Customer?> GetByEmailAsync(string email)
         {
-            // ✅ Example of business rule: check for duplicate email
-            var existingCustomers = await _customerRepository.GetAllAsync();
-            if (existingCustomers.Any(c => c.Email == customer.Email))
-                throw new InvalidOperationException("Customer with this email already exists.");
-
-            await _customerRepository.AddAsync(customer);
-            await _customerRepository.SaveChangesAsync();
+            return await _customerRepository.GetByEmailAsync(email);
         }
 
-        public async Task UpdateCustomerAsync(Customer customer)
+        public async Task<Customer> AddCustomerAsync(CreateCustomerRequest customer)
         {
-            await _customerRepository.UpdateAsync(customer);
+            var existing = await _customerRepository.GetByEmailAsync(customer.Email);
+            if (existing != null)
+                throw new InvalidOperationException("Customer with this email already exists.");
+
+            Customer newCustomer = new()
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email,
+                PhoneNumber = customer.PhoneNumber
+            };
+
+            Customer createdCustomer = await _customerRepository.AddAsync(newCustomer);
             await _customerRepository.SaveChangesAsync();
+
+            return createdCustomer;
+        }
+
+        public async Task<Customer?> UpdateCustomerAsync(int id, UpdateCustomerRequest request)
+        {
+            var customerToUpdate = await _customerRepository.GetByIdAsync(id);
+            if (customerToUpdate == null)
+                return null;
+
+            if (!string.IsNullOrWhiteSpace(request.FirstName))
+                customerToUpdate.FirstName = request.FirstName;
+
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+                customerToUpdate.LastName = request.LastName;
+
+            if (!string.IsNullOrWhiteSpace(request.Email) &&
+                !string.Equals(request.Email, customerToUpdate.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var existingEmail = await _customerRepository.GetByEmailAsync(request.Email);
+                if (existingEmail != null)
+                    throw new InvalidOperationException("Customer with this email already exists.");
+
+                customerToUpdate.Email = request.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+                customerToUpdate.PhoneNumber = request.PhoneNumber;
+
+            var udpated = await _customerRepository.UpdateAsync(customerToUpdate);
+            await _customerRepository.SaveChangesAsync();
+
+            return udpated;
         }
 
         public async Task DeleteCustomerAsync(int id)

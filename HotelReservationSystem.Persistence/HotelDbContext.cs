@@ -1,11 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using HotelReservationSystem.Domain.Entities;
+﻿using HotelReservationSystem.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservationSystem.Persistence
 {
     public class HotelDbContext : DbContext
     {
-        public HotelDbContext(DbContextOptions<HotelDbContext> options) : base(options) { }
+        public HotelDbContext(DbContextOptions<HotelDbContext> options) : base(options)
+        {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        }
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Room> Rooms { get; set; }
@@ -17,7 +20,7 @@ namespace HotelReservationSystem.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 🔹 Mapowanie nazw tabel do małych liter
+            // Mapping tables
             modelBuilder.Entity<Customer>().ToTable("customers");
             modelBuilder.Entity<Room>().ToTable("rooms");
             modelBuilder.Entity<Booking>().ToTable("bookings");
@@ -26,7 +29,6 @@ namespace HotelReservationSystem.Persistence
             modelBuilder.Entity<ExtraService>().ToTable("extra_services");
             modelBuilder.Entity<BookingService>().ToTable("booking_services");
 
-            // 🔹 (Opcjonalnie) mapowanie nazw kolumn jeśli chcesz 100% zgodności z SQL
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");

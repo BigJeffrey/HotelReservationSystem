@@ -1,4 +1,5 @@
-﻿using HotelReservationSystem.Domain.Entities;
+﻿using HotelReservationSystem.Application.DTOs.Customers;
+using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.Interfaces
 {
@@ -6,8 +7,8 @@ namespace HotelReservationSystem.Application.Interfaces
     {
         Task<IEnumerable<Customer>> GetAllCustomersAsync();
         Task<Customer?> GetCustomerByIdAsync(int id);
-        Task AddCustomerAsync(Customer customer);
-        Task UpdateCustomerAsync(Customer customer);
+        Task<Customer> AddCustomerAsync(CreateCustomerRequest customer);
+        Task<Customer?> UpdateCustomerAsync(int id, UpdateCustomerRequest customer);
         Task DeleteCustomerAsync(int id);
     }
 }

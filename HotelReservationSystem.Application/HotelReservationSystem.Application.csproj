@@ -10,4 +10,8 @@
     <ProjectReference Include="..\HotelReservationSystem.Domain\HotelReservationSystem.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
 </Project>
