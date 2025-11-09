@@ -2,7 +2,7 @@
 
 namespace HotelReservationSystem.Application.DTOs.ExtraServices
 {
-    public class CreateExtraServicesRequest
+    public class CreateExtraServiceRequest
     {
         [Required]
         [MaxLength(100, ErrorMessage = "Service name cannot exceed 100 characters.")]

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace HotelReservationSystem.Domain.Entities
+﻿namespace HotelReservationSystem.Domain.Entities
 {
     public class ExtraService
     {
@@ -9,6 +7,6 @@ namespace HotelReservationSystem.Domain.Entities
         public string? Description { get; set; }
         public decimal Price { get; set; }
 
-        public ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
+        public ICollection<BookingServiceEntity> BookingServices { get; set; } = new List<BookingServiceEntity>();
     }
 }

@@ -1,7 +1,10 @@
-﻿namespace HotelReservationSystem.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HotelReservationSystem.Domain.Entities
 {
-    public class BookingService
+    public class BookingServiceEntity
     {
+        [Key]
         public int BookingServiceId { get; set; }
         public int BookingId { get; set; }
         public int ExtraServiceId { get; set; }

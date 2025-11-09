@@ -1,48 +1,43 @@
-﻿using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservationSystem.Persistence.Repositories
 {
-    public class ExtraServicesRepository : IExtraServicesRepository
+    public class PaymentRepository(HotelDbContext context) : IPaymentRepository
     {
-        private readonly HotelDbContext _context;
+        private readonly HotelDbContext _context = context;
 
-        public ExtraServicesRepository(HotelDbContext context)
+        public async Task<IEnumerable<Payment>> GetAllAsync()
         {
-            _context = context;
+            return await _context.Payments.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<ExtraService>> GetAllAsync()
+        public async Task<Payment?> GetByIdAsync(int id)
         {
-            return await _context.ExtraServices.AsNoTracking().ToListAsync();
+            return await _context.Payments.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.PaymentId == id);
         }
 
-        public async Task<ExtraService?> GetByIdAsync(int id)
+        public async Task<Payment> AddAsync(Payment payment)
         {
-            return await _context.ExtraServices.AsNoTracking()
-                .FirstOrDefaultAsync(c => c.ExtraServiceId == id);
+            await _context.Payments.AddAsync(payment);
+            return payment;
         }
 
-        public async Task<ExtraService> AddAsync(ExtraService extraService)
+        public async Task<Payment> UpdateAsync(Payment payment)
         {
-            await _context.ExtraServices.AddAsync(extraService);
-            return extraService;
-        }
-
-        public async Task<ExtraService> UpdateAsync(ExtraService extraService)
-        {
-            _context.ExtraServices.Update(extraService);
+            _context.Payments.Update(payment);
             await Task.CompletedTask;
-            return extraService;
+            return payment;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var existing = await _context.ExtraServices.FindAsync(id);
+            var existing = await _context.Payments.FindAsync(id);
             if (existing != null)
             {
-                _context.ExtraServices.Remove(existing);
+                _context.Payments.Remove(existing);
             }
         }
 

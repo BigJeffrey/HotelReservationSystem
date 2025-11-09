@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HotelReservationSystem.Domain.Entities
+﻿namespace HotelReservationSystem.Domain.Entities
 {
     public class Payment
     {

@@ -1,8 +1,4 @@
-﻿using HotelReservationSystem.Domain.Entities;
-using System;
-using System.Collections.Generic;
-
-namespace HotelReservationSystem.Domain.Entities
+﻿namespace HotelReservationSystem.Domain.Entities
 {
     public class Booking
     {
@@ -16,6 +12,6 @@ namespace HotelReservationSystem.Domain.Entities
         public Customer Customer { get; set; } = null!;
         public ICollection<BookingDetail> BookingDetails { get; set; } = new List<BookingDetail>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-        public ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
+        public ICollection<BookingServiceEntity> BookingServices { get; set; } = new List<BookingServiceEntity>();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using HotelReservationSystem.Domain.Entities;
 
-namespace HotelReservationSystem.Application.Interfaces
+namespace HotelReservationSystem.Application.Interfaces.Repositories
 {
     public interface ICustomerRepository
     {

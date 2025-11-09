@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservationSystem.Application.DTOs.Payments
 {
@@ -15,6 +14,9 @@ namespace HotelReservationSystem.Application.DTOs.Payments
         [Required]
         [MaxLength(50)]
         public string PaymentMethod { get; set; } = string.Empty;
+
+        [Required]
+        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 
         [MaxLength(20)]
         public string? Status { get; set; } = "pending";

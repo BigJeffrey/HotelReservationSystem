@@ -16,7 +16,7 @@ namespace HotelReservationSystem.Persistence
         public DbSet<BookingDetail> BookingDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<ExtraService> ExtraServices { get; set; }
-        public DbSet<BookingService> BookingServices { get; set; }
+        public DbSet<BookingServiceEntity> BookingServices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,11 +27,12 @@ namespace HotelReservationSystem.Persistence
             modelBuilder.Entity<BookingDetail>().ToTable("booking_details");
             modelBuilder.Entity<Payment>().ToTable("payments");
             modelBuilder.Entity<ExtraService>().ToTable("extra_services");
-            modelBuilder.Entity<BookingService>().ToTable("booking_services");
+            modelBuilder.Entity<BookingServiceEntity>().ToTable("booking_services");
 
             // Mapping columns
             modelBuilder.Entity<Customer>(entity =>
             {
+                entity.HasKey(e => e.CustomerId);
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");
                 entity.Property(e => e.FirstName).HasColumnName("first_name");
                 entity.Property(e => e.LastName).HasColumnName("last_name");
@@ -42,7 +43,8 @@ namespace HotelReservationSystem.Persistence
 
             modelBuilder.Entity<Room>(entity =>
             {
-                entity.Property(e => e.RoomId).HasColumnName("customer_id");
+                entity.HasKey(e => e.RoomId);
+                entity.Property(e => e.RoomId).HasColumnName("room_id");
                 entity.Property(e => e.RoomNumber).HasColumnName("room_number");
                 entity.Property(e => e.RoomType).HasColumnName("room_type");
                 entity.Property(e => e.PricePerNight).HasColumnName("price_per_night");
@@ -52,6 +54,7 @@ namespace HotelReservationSystem.Persistence
 
             modelBuilder.Entity<Booking>(entity =>
             {
+                entity.HasKey(e => e.BookingId);
                 entity.Property(e => e.BookingId).HasColumnName("booking_id");
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");
                 entity.Property(e => e.BookingDate).HasColumnName("booking_date");
@@ -62,7 +65,8 @@ namespace HotelReservationSystem.Persistence
 
             modelBuilder.Entity<BookingDetail>(entity =>
             {
-                entity.Property(e => e.BookingDetailId).HasColumnType("booking_details_id");
+                entity.HasKey(e => e.BookingDetailId);
+                entity.Property(e => e.BookingDetailId).HasColumnName("booking_detail_id");
                 entity.Property(e => e.BookingId).HasColumnName("booking_id");
                 entity.Property(e => e.RoomId).HasColumnName("room_id");
                 entity.Property(e => e.Price).HasColumnName("price");
@@ -71,7 +75,8 @@ namespace HotelReservationSystem.Persistence
 
             modelBuilder.Entity<Payment>(entity =>
             {
-                entity.Property(e => e.PaymentId).HasColumnType("payment_id");
+                entity.HasKey(e => e.PaymentId);
+                entity.Property(e => e.PaymentId).HasColumnName("payment_id");
                 entity.Property(e => e.BookingId).HasColumnName("booking_id");
                 entity.Property(e => e.Amount).HasColumnName("amount");
                 entity.Property(e => e.PaymentDate).HasColumnName("payment_date");
@@ -81,15 +86,17 @@ namespace HotelReservationSystem.Persistence
 
             modelBuilder.Entity<ExtraService>(entity =>
             {
+                entity.HasKey(e => e.ExtraServiceId);
                 entity.Property(e => e.ExtraServiceId).HasColumnName("extra_service_id");
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Description).HasColumnName("description");
                 entity.Property(e => e.Price).HasColumnName("price");
             });
 
-            modelBuilder.Entity<BookingService>(entity =>
+            modelBuilder.Entity<BookingServiceEntity>(entity =>
             {
-                entity.Property(e => e.BookingServiceId).HasColumnName("booking_service_id");
+                entity.HasKey(e => e.BookingServiceId);
+                entity.Property(e => e.BookingServiceId).HasColumnName("booking_services_id");
                 entity.Property(e => e.BookingId).HasColumnName("booking_id");
                 entity.Property(e => e.ExtraServiceId).HasColumnName("extra_service_id");
                 entity.Property(e => e.Quantity).HasColumnName("quantity");

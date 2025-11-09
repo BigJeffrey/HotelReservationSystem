@@ -1,16 +1,12 @@
 ﻿using HotelReservationSystem.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HotelReservationSystem.Application.Interfaces
+namespace HotelReservationSystem.Application.Interfaces.Repositories
 {
-    internal interface IRoomsRepository
+    public interface IRoomRepository
     {
         Task<IEnumerable<Room>> GetAllAsync();
         Task<Room?> GetByIdAsync(int id);
+        Task<Room?> GetByRoomNumberAsync(string roomNumber);
         Task<Room> AddAsync(Room payment);
         Task<Room> UpdateAsync(Room payment);
         Task DeleteAsync(int id);

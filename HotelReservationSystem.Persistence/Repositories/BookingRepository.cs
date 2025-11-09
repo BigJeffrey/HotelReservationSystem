@@ -1,17 +1,12 @@
-﻿using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservationSystem.Persistence.Repositories
 {
-    public class BookingRepository : IBookingsRepository
+    public class BookingRepository(HotelDbContext context) : IBookingRepository
     {
-        private readonly HotelDbContext _context;
-
-        public BookingRepository(HotelDbContext context)
-        {
-            _context = context;
-        }
+        private readonly HotelDbContext _context = context;
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
         {

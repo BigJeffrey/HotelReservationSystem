@@ -1,7 +1,6 @@
-﻿using HotelReservationSystem.Application.Interfaces;
-using HotelReservationSystem.Domain.Entities;
-using HotelReservationSystem.Application.DTOs.Customers;
+﻿using HotelReservationSystem.Application.DTOs.Customers;
 using Microsoft.AspNetCore.Mvc;
+using HotelReservationSystem.Application.Interfaces.Services;
 
 namespace HotelReservationSystem.Presentation.Controllers
 {
@@ -11,26 +10,23 @@ namespace HotelReservationSystem.Presentation.Controllers
     {
         private readonly ICustomerService _customerService = customerService;
 
-        // GET: api/customers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var customers = await _customerService.GetAllCustomersAsync();
-            return Ok(customers);
+            var customers = await _customerService.GetAllAsync();
+            return !customers.Any() ? NotFound() : Ok(customers);
         }
 
-        // GET: api/customers/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var customer = await _customerService.GetCustomerByIdAsync(id);
+            var customer = await _customerService.GetByIdAsync(id);
             if (customer == null)
                 return NotFound();
 
             return Ok(customer);
         }
 
-        // POST: api/customers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCustomerRequest request)
         {
@@ -39,10 +35,8 @@ namespace HotelReservationSystem.Presentation.Controllers
 
             try
             { 
-                var newCustomer = await _customerService.AddCustomerAsync(request);
-                return CreatedAtAction(nameof(GetById),
-                new { id = newCustomer.CustomerId },
-                newCustomer);
+                var newCustomer = await _customerService.AddAsync(request);
+                return CreatedAtAction(nameof(GetById), new { id = newCustomer.CustomerId }, newCustomer);
             }
             catch (InvalidOperationException ex)
             {
@@ -50,7 +44,6 @@ namespace HotelReservationSystem.Presentation.Controllers
             }
         }
 
-        // PUT: api/customers/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCustomerRequest request)
         {
@@ -58,7 +51,7 @@ namespace HotelReservationSystem.Presentation.Controllers
                 return BadRequest(ModelState);
             try
             {
-                var updatedCustomer = await _customerService.UpdateCustomerAsync(id, request);
+                var updatedCustomer = await _customerService.UpdateAsync(id, request);
                 if (updatedCustomer == null)
                     return NotFound();
 
@@ -70,15 +63,14 @@ namespace HotelReservationSystem.Presentation.Controllers
             }
         }
 
-        // DELETE: api/customers/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var customer = await _customerService.GetCustomerByIdAsync(id);
+            var customer = await _customerService.GetByIdAsync(id);
             if (customer == null)
                 return NotFound();
 
-            await _customerService.DeleteCustomerAsync(id);
+            await _customerService.DeleteAsync(id);
             return NoContent();
         }
     }

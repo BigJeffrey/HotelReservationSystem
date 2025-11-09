@@ -1,16 +1,13 @@
 ﻿using HotelReservationSystem.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HotelReservationSystem.Application.Interfaces
+namespace HotelReservationSystem.Application.Interfaces.Repositories
 {
-    public interface IExtraServicesRepository
+    public interface IExtraServiceRepository
     {
         Task<IEnumerable<ExtraService>> GetAllAsync();
         Task<ExtraService?> GetByIdAsync(int id);
+        Task<ExtraService?> GetByNameAsync(string name);
+
         Task<ExtraService> AddAsync(ExtraService extraService);
         Task<ExtraService> UpdateAsync(ExtraService extraService);
         Task DeleteAsync(int id);

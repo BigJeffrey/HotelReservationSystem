@@ -2,7 +2,7 @@
 
 namespace HotelReservationSystem.Application.DTOs.BookingServices
 {
-    public class CreateBookingServicesRequest
+    public class CreateBookingServiceRequest
     {
         [Required]
         public int BookingId { get; set; }

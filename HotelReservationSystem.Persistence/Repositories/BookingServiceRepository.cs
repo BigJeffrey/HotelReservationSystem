@@ -1,36 +1,31 @@
-﻿using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservationSystem.Persistence.Repositories
 {
-    public class BookingServiceRepository : IBookingServicesRepository
+    public class BookingServiceRepository(HotelDbContext context) : IBookingServiceRepository
     {
-        private readonly HotelDbContext _context;
+        private readonly HotelDbContext _context = context;
 
-        public BookingServiceRepository(HotelDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<IEnumerable<BookingService>> GetAllAsync()
+        public async Task<IEnumerable<BookingServiceEntity>> GetAllAsync()
         {
             return await _context.BookingServices.AsNoTracking().ToListAsync();
         }
 
-        public async Task<BookingService?> GetByIdAsync(int id)
+        public async Task<BookingServiceEntity?> GetByIdAsync(int id)
         {
             return await _context.BookingServices.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.BookingServiceId == id);
         }
 
-        public async Task<BookingService> AddAsync(BookingService bookingService)
+        public async Task<BookingServiceEntity> AddAsync(BookingServiceEntity bookingService)
         {
             await _context.BookingServices.AddAsync(bookingService);
             return bookingService;
         }
 
-        public async Task<BookingService> UpdateAsync(BookingService bookingService)
+        public async Task<BookingServiceEntity> UpdateAsync(BookingServiceEntity bookingService)
         {
             _context.BookingServices.Update(bookingService);
             await Task.CompletedTask;

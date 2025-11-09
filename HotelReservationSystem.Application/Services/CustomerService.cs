@@ -1,5 +1,6 @@
 ﻿using HotelReservationSystem.Application.DTOs.Customers;
-using HotelReservationSystem.Application.Interfaces;
+using HotelReservationSystem.Application.Interfaces.Repositories;
+using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.Services
@@ -13,12 +14,12 @@ namespace HotelReservationSystem.Application.Services
             _customerRepository = customerRepository;
         }
 
-        public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
+        public async Task<IEnumerable<Customer>> GetAllAsync()
         {
             return await _customerRepository.GetAllAsync();
         }
 
-        public async Task<Customer?> GetCustomerByIdAsync(int id)
+        public async Task<Customer?> GetByIdAsync(int id)
         {
             return await _customerRepository.GetByIdAsync(id);
         }
@@ -28,7 +29,7 @@ namespace HotelReservationSystem.Application.Services
             return await _customerRepository.GetByEmailAsync(email);
         }
 
-        public async Task<Customer> AddCustomerAsync(CreateCustomerRequest customer)
+        public async Task<Customer> AddAsync(CreateCustomerRequest customer)
         {
             var existing = await _customerRepository.GetByEmailAsync(customer.Email);
             if (existing != null)
@@ -48,7 +49,7 @@ namespace HotelReservationSystem.Application.Services
             return createdCustomer;
         }
 
-        public async Task<Customer?> UpdateCustomerAsync(int id, UpdateCustomerRequest request)
+        public async Task<Customer?> UpdateAsync(int id, UpdateCustomerRequest request)
         {
             var customerToUpdate = await _customerRepository.GetByIdAsync(id);
             if (customerToUpdate == null)
@@ -79,8 +80,12 @@ namespace HotelReservationSystem.Application.Services
             return udpated;
         }
 
-        public async Task DeleteCustomerAsync(int id)
+        public async Task DeleteAsync(int id)
         {
+            var existing = await _customerRepository.GetByIdAsync(id);
+            if (existing is null)
+                throw new KeyNotFoundException("Customer not found.");
+
             await _customerRepository.DeleteAsync(id);
             await _customerRepository.SaveChangesAsync();
         }

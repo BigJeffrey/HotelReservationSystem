@@ -1,48 +1,49 @@
-﻿using HotelReservationSystem.Application.Interfaces;
+﻿using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservationSystem.Persistence.Repositories
 {
-    public class ExtraServicesRepository : IExtraServicesRepository
+    public class RoomRepository(HotelDbContext context) : IRoomRepository
     {
-        private readonly HotelDbContext _context;
+        private readonly HotelDbContext _context = context;
 
-        public ExtraServicesRepository(HotelDbContext context)
+        public async Task<IEnumerable<Room>> GetAllAsync()
         {
-            _context = context;
+            return await _context.Rooms.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<ExtraService>> GetAllAsync()
+        public async Task<Room?> GetByIdAsync(int id)
         {
-            return await _context.ExtraServices.AsNoTracking().ToListAsync();
+            return await _context.Rooms.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.RoomId == id);
         }
 
-        public async Task<ExtraService?> GetByIdAsync(int id)
+        public async Task<Room?> GetByRoomNumberAsync(string roomNumber)
         {
-            return await _context.ExtraServices.AsNoTracking()
-                .FirstOrDefaultAsync(c => c.ExtraServiceId == id);
+            return await _context.Rooms.AsNoTracking()
+                .FirstOrDefaultAsync(r => r.RoomNumber == roomNumber);
         }
 
-        public async Task<ExtraService> AddAsync(ExtraService extraService)
+        public async Task<Room> AddAsync(Room room)
         {
-            await _context.ExtraServices.AddAsync(extraService);
-            return extraService;
+            await _context.Rooms.AddAsync(room);
+            return room;
         }
 
-        public async Task<ExtraService> UpdateAsync(ExtraService extraService)
+        public async Task<Room> UpdateAsync(Room room)
         {
-            _context.ExtraServices.Update(extraService);
+            _context.Rooms.Update(room);
             await Task.CompletedTask;
-            return extraService;
+            return room;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var existing = await _context.ExtraServices.FindAsync(id);
+            var existing = await _context.Rooms.FindAsync(id);
             if (existing != null)
             {
-                _context.ExtraServices.Remove(existing);
+                _context.Rooms.Remove(existing);
             }
         }
 
