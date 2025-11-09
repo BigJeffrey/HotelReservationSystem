@@ -46,7 +46,7 @@ namespace HotelReservationSystem.Persistence
                 entity.HasKey(e => e.RoomId);
                 entity.Property(e => e.RoomId).HasColumnName("room_id");
                 entity.Property(e => e.RoomNumber).HasColumnName("room_number");
-                entity.Property(e => e.RoomType).HasColumnName("room_type");
+                entity.Property(e => e.RoomType).HasConversion<string>().HasColumnName("room_type");
                 entity.Property(e => e.PricePerNight).HasColumnName("price_per_night");
                 entity.Property(e => e.Capacity).HasColumnName("capacity");
                 entity.Property(e => e.IsAvailable).HasColumnName("is_available");
