@@ -1,4 +1,5 @@
 ﻿using HotelReservationSystem.Application.DTOs.Bookings;
+using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -14,14 +15,130 @@ namespace HotelReservationSystem.Application.Services
             _bookingRepository = bookingRepository;
         }
 
-        public async Task<IEnumerable<Booking>> GetAllAsync()
+        public async Task<PagedResponse<BookingResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _bookingRepository.GetAllAsync();
+            var totalCount = await _bookingRepository.CountAsync();
+
+            var bookings = await _bookingRepository.GetAllAsync(page, pageSize);
+
+            var items = bookings.Select(b => new BookingResponse
+            {
+                BookingId = b.BookingId,
+                BookingDate = b.BookingDate,
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                Status = b.Status,
+                Customer = new CustomerResponse
+                {
+                    CustomerId = b.Customer.CustomerId,
+                    FirstName = b.Customer.FirstName,
+                    LastName = b.Customer.LastName,
+                    Email = b.Customer.Email,
+                    PhoneNumber = b.Customer.PhoneNumber
+                },
+                BookingDetails = b.BookingDetails.Select(d => new BookingDetailResponse
+                {
+                    Nights = d.Nights,
+                    Price = d.Price,
+                    Room = new RoomResponse
+                    {
+                        RoomId = d.Room.RoomId,
+                        RoomNumber = d.Room.RoomNumber,
+                        Type = d.Room.RoomType,
+                        PricePerNight = d.Room.PricePerNight,
+                        Capacity = d.Room.Capacity,
+                        IsAvailable = d.Room.IsAvailable
+                    }
+                }).ToList(),
+                Payments = b.Payments.Select(p => new PaymentResponse
+                {
+                    PaymentId = p.PaymentId,
+                    Amount = p.Amount,
+                    PaymentDate = p.PaymentDate,
+                    PaymentMethod = p.PaymentMethod,
+                    Status = p.Status
+                }).ToList(),
+                ExtraServices = b.BookingServices.Select(s => new BookingServiceResponse
+                {
+                    TotalPrice = s.TotalPrice,
+                    Quantity = s.Quantity,
+                    ExtraService = new ExtraServiceResponse
+                    {
+                        ExtraServiceId = s.ExtraService.ExtraServiceId,
+                        Name = s.ExtraService.Name,
+                        Description = s.ExtraService.Description,
+                        Price = s.ExtraService.Price
+                    }
+                }).ToList()
+            }).ToList();
+
+            return new PagedResponse<BookingResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<Booking?> GetByIdAsync(int id)
+        public async Task<BookingResponse?> GetByIdAsync(int id)
         {
-            return await _bookingRepository.GetByIdAsync(id);
+            var b = await _bookingRepository.GetByIdAsync(id);
+            if (b is null)
+                return null;
+
+            var bookingResponse = new BookingResponse
+            {
+                BookingId = b.BookingId,
+                BookingDate = b.BookingDate,
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                Status = b.Status,
+                Customer = new CustomerResponse
+                {
+                    CustomerId = b.Customer.CustomerId,
+                    FirstName = b.Customer.FirstName,
+                    LastName = b.Customer.LastName,
+                    Email = b.Customer.Email,
+                    PhoneNumber = b.Customer.PhoneNumber
+                },
+                BookingDetails = b.BookingDetails.Select(d => new BookingDetailResponse
+                {
+                    Nights = d.Nights,
+                    Price = d.Price,
+                    Room = new RoomResponse
+                    {
+                        RoomId = d.Room.RoomId,
+                        RoomNumber = d.Room.RoomNumber,
+                        Type = d.Room.RoomType,
+                        PricePerNight = d.Room.PricePerNight,
+                        Capacity = d.Room.Capacity,
+                        IsAvailable = d.Room.IsAvailable
+                    }
+                }).ToList(),
+                Payments = b.Payments.Select(p => new PaymentResponse
+                {
+                    PaymentId = p.PaymentId,
+                    Amount = p.Amount,
+                    PaymentDate = p.PaymentDate,
+                    PaymentMethod = p.PaymentMethod,
+                    Status = p.Status
+                }).ToList(),
+                ExtraServices = b.BookingServices.Select(s => new BookingServiceResponse
+                {
+                    TotalPrice = s.TotalPrice,
+                    Quantity = s.Quantity,
+                    ExtraService = new ExtraServiceResponse
+                    {
+                        ExtraServiceId = s.ExtraService.ExtraServiceId,
+                        Name = s.ExtraService.Name,
+                        Description = s.ExtraService.Description,
+                        Price = s.ExtraService.Price
+                    }
+                }).ToList()
+            };
+
+            return bookingResponse;
         }
 
         public async Task<Booking> AddAsync(CreateBookingRequest request)

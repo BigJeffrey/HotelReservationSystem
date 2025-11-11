@@ -4,7 +4,8 @@ namespace HotelReservationSystem.Application.Interfaces.Repositories
 {
     public interface IExtraServiceRepository
     {
-        Task<IEnumerable<ExtraService>> GetAllAsync();
+        Task<int> CountAsync();
+        Task<IEnumerable<ExtraService>> GetAllAsync(int page, int pageSize);
         Task<ExtraService?> GetByIdAsync(int id);
         Task<ExtraService?> GetByNameAsync(string name);
 

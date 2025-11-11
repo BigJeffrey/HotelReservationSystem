@@ -11,10 +11,10 @@ namespace HotelReservationSystem.Presentation.Controllers
         private readonly IRoomService _roomService = roomService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var rooms = await _roomService.GetAllAsync();
-            return !rooms.Any() ? NotFound() : Ok(rooms);
+            var rooms = await _roomService.GetAllAsync(page, pageSize);
+            return !rooms.Items.Any() ? NotFound() : Ok(rooms);
         }
 
         [HttpGet("{id:int}")]

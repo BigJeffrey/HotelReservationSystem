@@ -1,4 +1,5 @@
-﻿using HotelReservationSystem.Application.DTOs.ExtraServices;
+﻿using HotelReservationSystem.Application.DTOs.Common;
+using HotelReservationSystem.Application.DTOs.ExtraServices;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -14,14 +15,42 @@ namespace HotelReservationSystem.Application.Services
             _extraServiceRepository = extraServiceRepository;
         }
 
-        public async Task<IEnumerable<ExtraService>> GetAllAsync()
+        public async Task<PagedResponse<ExtraServiceResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _extraServiceRepository.GetAllAsync();
+            var totalCount = await _extraServiceRepository.CountAsync();
+
+            var extraServices = await _extraServiceRepository.GetAllAsync(page, pageSize);
+
+            var items = extraServices.Select(e => new ExtraServiceResponse
+            {
+                ExtraServiceId = e.ExtraServiceId,
+                Name = e.Name,
+                Description = e.Description,
+                Price = e.Price,
+            }).ToList();
+
+            return new PagedResponse<ExtraServiceResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<ExtraService?> GetByIdAsync(int id)
+        public async Task<ExtraServiceResponse?> GetByIdAsync(int id)
         {
-            return await _extraServiceRepository.GetByIdAsync(id);
+            var e = await _extraServiceRepository.GetByIdAsync(id);
+            if (e == null)
+                return null;
+
+            return new ExtraServiceResponse
+            {
+                ExtraServiceId = e.ExtraServiceId,
+                Name = e.Name,
+                Description = e.Description,
+                Price = e.Price,
+            };
         }
 
         public async Task<ExtraService> AddAsync(CreateExtraServiceRequest request)

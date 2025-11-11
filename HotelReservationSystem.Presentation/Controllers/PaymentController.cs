@@ -11,10 +11,10 @@ namespace HotelReservationSystem.Presentation.Controllers
         private readonly IPaymentService _paymentService = paymentService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _paymentService.GetAllAsync();
-            return !payments.Any() ? NotFound() : Ok(payments);
+            var payments = await _paymentService.GetAllAsync(page, pageSize);
+            return !payments.Items.Any() ? NotFound() : Ok(payments);
         }
 
         [HttpGet("{id:int}")]

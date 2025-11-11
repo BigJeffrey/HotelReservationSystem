@@ -8,14 +8,27 @@ namespace HotelReservationSystem.Persistence.Repositories
     {
         private readonly HotelDbContext _context = context;
 
-        public async Task<IEnumerable<BookingServiceEntity>> GetAllAsync()
+        public async Task<int> CountAsync()
         {
-            return await _context.BookingServices.AsNoTracking().ToListAsync();
+            return await _context.BookingServices.CountAsync();
+        }
+
+        public async Task<IEnumerable<BookingServiceEntity>> GetAllAsync(int page, int pageSize)
+        {
+            return await _context.BookingServices.AsNoTracking().AsNoTracking()
+                .Include(bs => bs.Booking)
+                .Include(bs => bs.ExtraService)
+                .OrderBy(bs => bs.BookingServiceId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<BookingServiceEntity?> GetByIdAsync(int id)
         {
             return await _context.BookingServices.AsNoTracking()
+                .Include(bs => bs.Booking)
+                .Include(bs => bs.ExtraService)
                 .FirstOrDefaultAsync(c => c.BookingServiceId == id);
         }
 

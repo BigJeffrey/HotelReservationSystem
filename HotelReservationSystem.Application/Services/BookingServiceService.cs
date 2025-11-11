@@ -1,4 +1,5 @@
 ﻿using HotelReservationSystem.Application.DTOs.BookingServices;
+using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -21,13 +22,71 @@ namespace HotelReservationSystem.Application.Services
             _extraServiceRepository = extraServiceRepository;
         }
 
-        public async Task<IEnumerable<BookingServiceEntity>> GetAllAsync()
+        public async Task<PagedResponse<BookingServiceResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _bookingServiceRepository.GetAllAsync();
+            var totalCount = await _bookingServiceRepository.CountAsync();
+
+            var bookingServices = await _bookingServiceRepository.GetAllAsync(page, pageSize);
+
+            var items = bookingServices.Select(bs => new BookingServiceResponse
+            {
+                BookingServiceId = bs.BookingServiceId,
+                Quantity = bs.Quantity,
+                TotalPrice = bs.TotalPrice,
+                ExtraService = new ExtraServiceResponse
+                {
+                    ExtraServiceId = bs.ExtraService.ExtraServiceId,
+                    Name = bs.ExtraService.Name,
+                    Description = bs.ExtraService.Description,
+                    Price = bs.ExtraService.Price
+                },
+                Booking = bs.Booking is not null ? new BookingResponse
+                {
+                    BookingId = bs.Booking.BookingId,
+                    BookingDate = bs.Booking.BookingDate,
+                    StartDate = bs.Booking.StartDate,
+                    EndDate = bs.Booking.EndDate,
+                    Status = bs.Booking.Status
+                } : null
+            }).ToList();
+
+            return new PagedResponse<BookingServiceResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<BookingServiceEntity?> GetByIdAsync(int id)
-            => await _bookingServiceRepository.GetByIdAsync(id);
+        public async Task<BookingServiceResponse?> GetByIdAsync(int id)
+        {
+            var bs = await _bookingServiceRepository.GetByIdAsync(id);
+            if (bs == null)
+                return null;
+
+            return new BookingServiceResponse
+            {
+                BookingServiceId = bs.BookingServiceId,
+                Quantity = bs.Quantity,
+                TotalPrice = bs.TotalPrice,
+                ExtraService = new ExtraServiceResponse
+                {
+                    ExtraServiceId = bs.ExtraService.ExtraServiceId,
+                    Name = bs.ExtraService.Name,
+                    Description = bs.ExtraService.Description,
+                    Price = bs.ExtraService.Price
+                },
+                Booking = bs.Booking is not null ? new BookingResponse
+                {
+                    BookingId = bs.Booking.BookingId,
+                    BookingDate = bs.Booking.BookingDate,
+                    StartDate = bs.Booking.StartDate,
+                    EndDate = bs.Booking.EndDate,
+                    Status = bs.Booking.Status
+                } : null
+            };
+        }
 
         public async Task<BookingServiceEntity> AddAsync(CreateBookingServiceRequest request)
         {

@@ -11,10 +11,10 @@ namespace HotelReservationSystem.Presentation.Controllers
         private readonly ICustomerService _customerService = customerService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var customers = await _customerService.GetAllAsync();
-            return !customers.Any() ? NotFound() : Ok(customers);
+            var customers = await _customerService.GetAllAsync(page, pageSize);
+            return !customers.Items.Any() ? NotFound() : Ok(customers);
         }
 
         [HttpGet("{id}")]

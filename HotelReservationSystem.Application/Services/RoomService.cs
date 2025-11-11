@@ -2,7 +2,7 @@
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
-using HotelReservationSystem.Domain;
+using HotelReservationSystem.Application.DTOs.Common;
 
 namespace HotelReservationSystem.Application.Services
 {
@@ -15,14 +15,46 @@ namespace HotelReservationSystem.Application.Services
             _roomRepository = roomRepository;
         }
 
-        public async Task<IEnumerable<Room>> GetAllAsync()
+        public async Task<PagedResponse<RoomResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _roomRepository.GetAllAsync();
+            var totalCount = await _roomRepository.CountAsync();
+
+            var rooms = await _roomRepository.GetAllAsync(page, pageSize);
+
+            var items = rooms.Select(p => new RoomResponse
+            {
+                RoomId = p.RoomId,
+                RoomNumber = p.RoomNumber,
+                Type = p.RoomType,
+                PricePerNight = p.PricePerNight,
+                Capacity = p.Capacity,
+                IsAvailable = p.IsAvailable
+            }).ToList();
+
+            return new PagedResponse<RoomResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<Room?> GetByIdAsync(int id)
+        public async Task<RoomResponse?> GetByIdAsync(int id)
         {
-            return await _roomRepository.GetByIdAsync(id);
+            var room = await _roomRepository.GetByIdAsync(id);
+            if (room == null)
+                return null;
+
+            return new RoomResponse
+            {
+                RoomId = room.RoomId,
+                RoomNumber = room.RoomNumber,
+                Type = room.RoomType,
+                PricePerNight = room.PricePerNight,
+                Capacity = room.Capacity,
+                IsAvailable = room.IsAvailable
+            };
         }
 
         public async Task<Room> AddAsync(CreateRoomRequest request)

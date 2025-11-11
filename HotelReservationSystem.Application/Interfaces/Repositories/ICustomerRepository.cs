@@ -4,7 +4,8 @@ namespace HotelReservationSystem.Application.Interfaces.Repositories
 {
     public interface ICustomerRepository
     {
-        Task<IEnumerable<Customer>> GetAllAsync();
+        Task<int> CountAsync();
+        Task<IEnumerable<Customer>> GetAllAsync(int page, int pageSize);
         Task<Customer?> GetByIdAsync(int id);
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer> AddAsync(Customer customer);

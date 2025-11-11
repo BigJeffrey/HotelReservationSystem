@@ -1,4 +1,5 @@
 ﻿using HotelReservationSystem.Application.DTOs.BookingDetails;
+using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -21,11 +22,76 @@ namespace HotelReservationSystem.Application.Services
             _roomRepository = roomRepository;
         }
 
-        public async Task<IEnumerable<BookingDetail>> GetAllAsync()
-            => await _bookingDetailRepository.GetAllAsync();
+        public async Task<PagedResponse<BookingDetailResponse>> GetAllAsync(int page, int pageSize)
+        {
+            var totalCount = await _bookingDetailRepository.CountAsync();
 
-        public async Task<BookingDetail?> GetByIdAsync(int id)
-            => await _bookingDetailRepository.GetByIdAsync(id);
+            var bookingDetails = await _bookingDetailRepository.GetAllAsync(page, pageSize);
+
+            var items = bookingDetails.Select(b => new BookingDetailResponse
+            {
+                BookingDetailId = b.BookingDetailId,
+                Price = b.Price,
+                Nights = b.Nights,
+                Booking = new BookingResponse
+                {
+                    BookingId = b.Booking.BookingId,
+                    BookingDate = b.Booking.BookingDate,
+                    StartDate = b.Booking.StartDate,
+                    EndDate = b.Booking.EndDate,
+                    Status = b.Booking.Status
+                },
+                Room = new DTOs.Rooms.RoomResponse
+                {
+                    RoomId = b.Room.RoomId,
+                    RoomNumber = b.Room.RoomNumber,
+                    Type = b.Room.RoomType,
+                    PricePerNight = b.Room.PricePerNight,
+                    Capacity = b.Room.Capacity,
+                    IsAvailable = b.Room.IsAvailable
+                } 
+            }).ToList();
+
+            return new PagedResponse<BookingDetailResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<BookingDetailResponse?> GetByIdAsync(int id)
+        {
+            var b = await _bookingDetailRepository.GetByIdAsync(id);
+            if (b is null)
+                return null;
+
+            return new BookingDetailResponse
+            {
+                BookingDetailId = b.BookingDetailId,
+                Price = b.Price,
+                Nights = b.Nights,
+                Booking = new BookingResponse
+                {
+                    BookingId = b.Booking.BookingId,
+                    CustomerId = b.Booking.Customer.CustomerId,
+                    BookingDate = b.Booking.BookingDate,
+                    StartDate = b.Booking.StartDate,
+                    EndDate = b.Booking.EndDate,
+                    Status = b.Booking.Status,
+                },
+                Room = new DTOs.Rooms.RoomResponse
+                {
+                    RoomId = b.Room.RoomId,
+                    RoomNumber = b.Room.RoomNumber,
+                    Type = b.Room.RoomType,
+                    PricePerNight = b.Room.PricePerNight,
+                    Capacity = b.Room.Capacity,
+                    IsAvailable = b.Room.IsAvailable
+                }
+            };
+        }
 
         public async Task<BookingDetail> AddAsync(CreateBookingDetailRequest request)
         {

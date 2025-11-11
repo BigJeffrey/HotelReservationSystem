@@ -1,4 +1,5 @@
-﻿using HotelReservationSystem.Application.DTOs.Customers;
+﻿using HotelReservationSystem.Application.DTOs.Common;
+using HotelReservationSystem.Application.DTOs.Customers;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -14,14 +15,60 @@ namespace HotelReservationSystem.Application.Services
             _customerRepository = customerRepository;
         }
 
-        public async Task<IEnumerable<Customer>> GetAllAsync()
+        public async Task<PagedResponse<CustomerResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _customerRepository.GetAllAsync();
+            var totalCount = await _customerRepository.CountAsync();
+
+            var customers = await _customerRepository.GetAllAsync(page, pageSize);
+
+            var items = customers.Select(c => new CustomerResponse
+            {
+                CustomerId = c.CustomerId,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                Email = c.Email,
+                PhoneNumber = c.PhoneNumber,
+                Bookings = c.Bookings.Select(b => new BookingsResponse
+                {
+                    BookingId = b.BookingId,
+                    BookingDate = b.BookingDate,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    Status = b.Status
+                }).ToList()
+            }).ToList();
+
+            return new PagedResponse<CustomerResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<Customer?> GetByIdAsync(int id)
+        public async Task<CustomerResponse?> GetByIdAsync(int id)
         {
-            return await _customerRepository.GetByIdAsync(id);
+            var c = await _customerRepository.GetByIdAsync(id);
+            if (c == null)
+                return null;
+
+            return new CustomerResponse
+            {
+                CustomerId = c.CustomerId,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                Email = c.Email,
+                PhoneNumber = c.PhoneNumber,
+                Bookings = c.Bookings.Select(b => new BookingsResponse
+                {
+                    BookingId = b.BookingId,
+                    BookingDate = b.BookingDate,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    Status = b.Status
+                }).ToList()
+            };
         }
 
         public async Task<Customer?> GetByEmailAsync(string email)

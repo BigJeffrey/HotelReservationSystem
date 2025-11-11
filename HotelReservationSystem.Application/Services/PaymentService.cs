@@ -1,4 +1,5 @@
-﻿using HotelReservationSystem.Application.DTOs.Payments;
+﻿using HotelReservationSystem.Application.DTOs.Common;
+using HotelReservationSystem.Application.DTOs.Payments;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
@@ -16,14 +17,44 @@ namespace HotelReservationSystem.Application.Services
             _bookingRepository = bookingRepository;
         }
 
-        public async Task<IEnumerable<Payment>> GetAllAsync()
+        public async Task<PagedResponse<PaymentResponse>> GetAllAsync(int page, int pageSize)
         {
-            return await _paymentRepository.GetAllAsync();
+            var totalCount = await _paymentRepository.CountAsync();
+
+            var extraServices = await _paymentRepository.GetAllAsync(page, pageSize);
+
+            var items = extraServices.Select(p => new PaymentResponse
+            {
+                PaymentId = p.PaymentId,
+                Amount = p.Amount,
+                PaymentDate = p.PaymentDate,
+                PaymentMethod = p.PaymentMethod,
+                Status = p.Status
+            }).ToList();
+
+            return new PagedResponse<PaymentResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public async Task<Payment?> GetByIdAsync(int id)
+        public async Task<PaymentResponse?> GetByIdAsync(int id)
         {
-            return await _paymentRepository.GetByIdAsync(id);
+            var p = await _paymentRepository.GetByIdAsync(id);
+            if (p == null)
+                return null;
+
+            return new PaymentResponse
+            {
+                PaymentId = p.PaymentId,
+                Amount = p.Amount,
+                PaymentDate = p.PaymentDate,
+                PaymentMethod = p.PaymentMethod,
+                Status = p.Status
+            };
         }
 
         public async Task<Payment> AddAsync(CreatePaymentRequest request)

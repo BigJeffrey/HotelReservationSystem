@@ -11,10 +11,10 @@ namespace HotelReservationSystem.Presentation.Controllers
         private readonly IExtraServiceService _extraServiceService = extraServiceService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         { 
-            var services = await _extraServiceService.GetAllAsync();
-            return !services.Any() ? NotFound() : Ok(services);
+            var services = await _extraServiceService.GetAllAsync(page, pageSize);
+            return !services.Items.Any() ? NotFound() : Ok(services);
         }
 
         [HttpGet("{id:int}")]
