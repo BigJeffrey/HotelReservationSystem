@@ -21,15 +21,7 @@ namespace HotelReservationSystem.Application.Services
 
             var rooms = await _roomRepository.GetAllAsync(page, pageSize);
 
-            var items = rooms.Select(p => new RoomResponse
-            {
-                RoomId = p.RoomId,
-                RoomNumber = p.RoomNumber,
-                Type = p.RoomType,
-                PricePerNight = p.PricePerNight,
-                Capacity = p.Capacity,
-                IsAvailable = p.IsAvailable
-            }).ToList();
+            var items = rooms.Select(r => new RoomResponse(r)).ToList();
 
             return new PagedResponse<RoomResponse>
             {
@@ -46,15 +38,7 @@ namespace HotelReservationSystem.Application.Services
             if (room == null)
                 return null;
 
-            return new RoomResponse
-            {
-                RoomId = room.RoomId,
-                RoomNumber = room.RoomNumber,
-                Type = room.RoomType,
-                PricePerNight = room.PricePerNight,
-                Capacity = room.Capacity,
-                IsAvailable = room.IsAvailable
-            };
+            return new RoomResponse(room);
         }
 
         public async Task<Room> AddAsync(CreateRoomRequest request)
@@ -78,7 +62,7 @@ namespace HotelReservationSystem.Application.Services
             return createdRoom;
         }
 
-        public async Task<Room?> UpdateAsync(int id, UpdateRoomRequest request)
+        public async Task<RoomResponse?> UpdateAsync(int id, UpdateRoomRequest request)
         {
             var room = await _roomRepository.GetByIdAsync(id);
             if (room == null)
@@ -105,10 +89,10 @@ namespace HotelReservationSystem.Application.Services
             if (request.IsAvailable.HasValue)
                 room.IsAvailable = request.IsAvailable.Value;
 
-            var updated = await _roomRepository.UpdateAsync(room);
+            var r = await _roomRepository.UpdateAsync(room);
             await _roomRepository.SaveChangesAsync();
 
-            return updated;
+            return new RoomResponse(r);
         }
 
         public async Task DeleteAsync(int id)

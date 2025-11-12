@@ -23,14 +23,7 @@ namespace HotelReservationSystem.Application.Services
 
             var extraServices = await _paymentRepository.GetAllAsync(page, pageSize);
 
-            var items = extraServices.Select(p => new PaymentResponse
-            {
-                PaymentId = p.PaymentId,
-                Amount = p.Amount,
-                PaymentDate = p.PaymentDate,
-                PaymentMethod = p.PaymentMethod,
-                Status = p.Status
-            }).ToList();
+            var items = extraServices.Select(p => new PaymentResponse(p)).ToList();
 
             return new PagedResponse<PaymentResponse>
             {
@@ -47,14 +40,7 @@ namespace HotelReservationSystem.Application.Services
             if (p == null)
                 return null;
 
-            return new PaymentResponse
-            {
-                PaymentId = p.PaymentId,
-                Amount = p.Amount,
-                PaymentDate = p.PaymentDate,
-                PaymentMethod = p.PaymentMethod,
-                Status = p.Status
-            };
+            return new PaymentResponse(p);
         }
 
         public async Task<Payment> AddAsync(CreatePaymentRequest request)
@@ -78,7 +64,7 @@ namespace HotelReservationSystem.Application.Services
             return created;
         }
 
-        public async Task<Payment?> UpdateAsync(int id, UpdatePaymentRequest request)
+        public async Task<PaymentResponse?> UpdateAsync(int id, UpdatePaymentRequest request)
         {
             var existing = await _paymentRepository.GetByIdAsync(id);
             if (existing is null)
@@ -96,10 +82,10 @@ namespace HotelReservationSystem.Application.Services
             if (request.PaymentDate.HasValue)
                 existing.PaymentDate = request.PaymentDate.Value;
 
-            var updated = await _paymentRepository.UpdateAsync(existing);
+            var p = await _paymentRepository.UpdateAsync(existing);
             await _paymentRepository.SaveChangesAsync();
 
-            return updated;
+            return new PaymentResponse(p);
         }
 
         public async Task DeleteAsync(int id)

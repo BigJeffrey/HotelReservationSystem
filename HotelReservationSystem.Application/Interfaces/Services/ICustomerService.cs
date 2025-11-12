@@ -10,7 +10,7 @@ namespace HotelReservationSystem.Application.Interfaces.Services
         Task<CustomerResponse?> GetByIdAsync(int id);
         Task<Customer?> GetByEmailAsync(string email);
         Task<Customer> AddAsync(CreateCustomerRequest customer);
-        Task<Customer?> UpdateAsync(int id, UpdateCustomerRequest customer);
+        Task<CustomerResponse?> UpdateAsync(int id, UpdateCustomerRequest customer);
         Task DeleteAsync(int id);
     }
 }

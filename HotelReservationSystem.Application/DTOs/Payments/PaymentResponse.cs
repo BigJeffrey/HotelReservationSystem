@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.DTOs.Payments
 {
@@ -13,5 +9,14 @@ namespace HotelReservationSystem.Application.DTOs.Payments
         public DateTime PaymentDate { get; set; }
         public string PaymentMethod { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+
+        public PaymentResponse(Payment p)
+        {
+            PaymentId = p.PaymentId;
+            Amount = p.Amount;
+            PaymentDate = p.PaymentDate;
+            PaymentMethod = p.PaymentMethod;
+            Status = p.Status;
+        }
     }
 }

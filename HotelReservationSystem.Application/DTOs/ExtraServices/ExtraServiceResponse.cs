@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.DTOs.ExtraServices
 {
@@ -12,5 +8,12 @@ namespace HotelReservationSystem.Application.DTOs.ExtraServices
         public string? Name { get; set; }
         public string? Description { get; set; }
         public decimal Price { get; set; }
+
+        public ExtraServiceResponse(ExtraService e) {
+            ExtraServiceId = e.ExtraServiceId;
+            Name = e.Name;
+            Description = e.Description;
+            Price = e.Price;
+        }
     }
 }

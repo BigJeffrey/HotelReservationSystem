@@ -28,27 +28,7 @@ namespace HotelReservationSystem.Application.Services
 
             var bookingServices = await _bookingServiceRepository.GetAllAsync(page, pageSize);
 
-            var items = bookingServices.Select(bs => new BookingServiceResponse
-            {
-                BookingServiceId = bs.BookingServiceId,
-                Quantity = bs.Quantity,
-                TotalPrice = bs.TotalPrice,
-                ExtraService = new ExtraServiceResponse
-                {
-                    ExtraServiceId = bs.ExtraService.ExtraServiceId,
-                    Name = bs.ExtraService.Name,
-                    Description = bs.ExtraService.Description,
-                    Price = bs.ExtraService.Price
-                },
-                Booking = bs.Booking is not null ? new BookingResponse
-                {
-                    BookingId = bs.Booking.BookingId,
-                    BookingDate = bs.Booking.BookingDate,
-                    StartDate = bs.Booking.StartDate,
-                    EndDate = bs.Booking.EndDate,
-                    Status = bs.Booking.Status
-                } : null
-            }).ToList();
+            var items = bookingServices.Select(bs => new BookingServiceResponse(bs)).ToList();
 
             return new PagedResponse<BookingServiceResponse>
             {
@@ -65,27 +45,7 @@ namespace HotelReservationSystem.Application.Services
             if (bs == null)
                 return null;
 
-            return new BookingServiceResponse
-            {
-                BookingServiceId = bs.BookingServiceId,
-                Quantity = bs.Quantity,
-                TotalPrice = bs.TotalPrice,
-                ExtraService = new ExtraServiceResponse
-                {
-                    ExtraServiceId = bs.ExtraService.ExtraServiceId,
-                    Name = bs.ExtraService.Name,
-                    Description = bs.ExtraService.Description,
-                    Price = bs.ExtraService.Price
-                },
-                Booking = bs.Booking is not null ? new BookingResponse
-                {
-                    BookingId = bs.Booking.BookingId,
-                    BookingDate = bs.Booking.BookingDate,
-                    StartDate = bs.Booking.StartDate,
-                    EndDate = bs.Booking.EndDate,
-                    Status = bs.Booking.Status
-                } : null
-            };
+            return new BookingServiceResponse(bs);
         }
 
         public async Task<BookingServiceEntity> AddAsync(CreateBookingServiceRequest request)
@@ -111,7 +71,7 @@ namespace HotelReservationSystem.Application.Services
             return created;
         }
 
-        public async Task<BookingServiceEntity?> UpdateAsync(int id, UpdateBookingServiceRequest request)
+        public async Task<BookingServiceResponse?> UpdateAsync(int id, UpdateBookingServiceRequest request)
         {
             var existing = await _bookingServiceRepository.GetByIdAsync(id);
             if (existing is null)
@@ -123,10 +83,10 @@ namespace HotelReservationSystem.Application.Services
             if (request.TotalPrice.HasValue)
                 existing.TotalPrice = request.TotalPrice.Value;
 
-            var updated = await _bookingServiceRepository.UpdateAsync(existing);
+            var bs = await _bookingServiceRepository.UpdateAsync(existing);
             await _bookingServiceRepository.SaveChangesAsync();
 
-            return updated;
+            return new BookingServiceResponse(bs);
         }
 
         public async Task DeleteAsync(int id)

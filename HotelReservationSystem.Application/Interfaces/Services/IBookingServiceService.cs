@@ -9,7 +9,7 @@ namespace HotelReservationSystem.Application.Interfaces.Services
         Task<PagedResponse<BookingServiceResponse>> GetAllAsync(int page, int pageSize);
         Task<BookingServiceResponse?> GetByIdAsync(int id);
         Task<BookingServiceEntity> AddAsync(CreateBookingServiceRequest request);
-        Task<BookingServiceEntity?> UpdateAsync(int id, UpdateBookingServiceRequest request);
+        Task<BookingServiceResponse?> UpdateAsync(int id, UpdateBookingServiceRequest request);
         Task DeleteAsync(int id);
     }
 }

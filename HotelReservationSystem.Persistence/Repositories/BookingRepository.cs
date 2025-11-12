@@ -17,10 +17,9 @@ namespace HotelReservationSystem.Persistence.Repositories
         {
             return await _context.Bookings.AsNoTracking()
                 .Include(b => b.Customer)
-                .Include(b => b.BookingDetails)
-                    .ThenInclude(b => b.Room)
+                .Include(b => b.BookingDetails).ThenInclude(d => d.Room)
                 .Include(b => b.Payments)
-                .Include(b => b.BookingServices)
+                .Include(b => b.BookingServices).ThenInclude(bs => bs.ExtraService)
                 .OrderByDescending(b => b.BookingDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -30,6 +29,10 @@ namespace HotelReservationSystem.Persistence.Repositories
         public async Task<Booking?> GetByIdAsync(int id)
         {
             return await _context.Bookings.AsNoTracking()
+                .Include(b => b.Customer)
+                .Include(b => b.BookingDetails).ThenInclude(b => b.Room)
+                .Include(b => b.Payments)
+                .Include(b => b.BookingServices).ThenInclude(bs => bs.ExtraService)
                 .FirstOrDefaultAsync(c => c.BookingId == id);
         }
 

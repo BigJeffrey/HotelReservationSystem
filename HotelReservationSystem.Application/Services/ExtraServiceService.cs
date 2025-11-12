@@ -21,13 +21,7 @@ namespace HotelReservationSystem.Application.Services
 
             var extraServices = await _extraServiceRepository.GetAllAsync(page, pageSize);
 
-            var items = extraServices.Select(e => new ExtraServiceResponse
-            {
-                ExtraServiceId = e.ExtraServiceId,
-                Name = e.Name,
-                Description = e.Description,
-                Price = e.Price,
-            }).ToList();
+            var items = extraServices.Select(e => new ExtraServiceResponse(e)).ToList();
 
             return new PagedResponse<ExtraServiceResponse>
             {
@@ -44,13 +38,7 @@ namespace HotelReservationSystem.Application.Services
             if (e == null)
                 return null;
 
-            return new ExtraServiceResponse
-            {
-                ExtraServiceId = e.ExtraServiceId,
-                Name = e.Name,
-                Description = e.Description,
-                Price = e.Price,
-            };
+            return new ExtraServiceResponse(e);
         }
 
         public async Task<ExtraService> AddAsync(CreateExtraServiceRequest request)
@@ -72,7 +60,7 @@ namespace HotelReservationSystem.Application.Services
             return created;
         }
 
-        public async Task<ExtraService?> UpdateAsync(int id, UpdateExtraServiceRequest request)
+        public async Task<ExtraServiceResponse?> UpdateAsync(int id, UpdateExtraServiceRequest request)
         {
             var existing = await _extraServiceRepository.GetByIdAsync(id);
             if (existing is null)
@@ -93,10 +81,10 @@ namespace HotelReservationSystem.Application.Services
             if (request.Price.HasValue)
                 existing.Price = request.Price.Value;
 
-            var updated = await _extraServiceRepository.UpdateAsync(existing);
+            var e = await _extraServiceRepository.UpdateAsync(existing);
             await _extraServiceRepository.SaveChangesAsync();
 
-            return updated;
+            return new ExtraServiceResponse(e);
         }
 
         public async Task DeleteAsync(int id)

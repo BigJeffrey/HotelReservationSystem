@@ -1,4 +1,5 @@
 ﻿using HotelReservationSystem.Application.DTOs.Rooms;
+using HotelReservationSystem.Domain.Entities;
 
 namespace HotelReservationSystem.Application.DTOs.BookingDetails
 {
@@ -9,6 +10,23 @@ namespace HotelReservationSystem.Application.DTOs.BookingDetails
         public int Nights { get; set; }
         public BookingResponse? Booking { get; set; }
         public RoomResponse? Room { get; set; }
+
+        public BookingDetailResponse(BookingDetail bd) 
+        {
+            BookingDetailId = bd.BookingDetailId;
+            Price = bd.Price;
+            Nights = bd.Nights;
+            Booking = new BookingResponse
+            {
+                BookingId = bd.Booking.BookingId,
+                CustomerId = bd.Booking.Customer.CustomerId,
+                BookingDate = bd.Booking.BookingDate,
+                StartDate = bd.Booking.StartDate,
+                EndDate = bd.Booking.EndDate,
+                Status = bd.Booking.Status,
+            };
+            Room = new RoomResponse(bd.Room);
+        }
     }
 
     public class BookingResponse

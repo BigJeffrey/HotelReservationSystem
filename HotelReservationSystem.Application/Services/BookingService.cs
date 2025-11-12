@@ -3,6 +3,7 @@ using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
+using System.Data.Common;
 
 namespace HotelReservationSystem.Application.Services
 {
@@ -21,56 +22,7 @@ namespace HotelReservationSystem.Application.Services
 
             var bookings = await _bookingRepository.GetAllAsync(page, pageSize);
 
-            var items = bookings.Select(b => new BookingResponse
-            {
-                BookingId = b.BookingId,
-                BookingDate = b.BookingDate,
-                StartDate = b.StartDate,
-                EndDate = b.EndDate,
-                Status = b.Status,
-                Customer = new CustomerResponse
-                {
-                    CustomerId = b.Customer.CustomerId,
-                    FirstName = b.Customer.FirstName,
-                    LastName = b.Customer.LastName,
-                    Email = b.Customer.Email,
-                    PhoneNumber = b.Customer.PhoneNumber
-                },
-                BookingDetails = b.BookingDetails.Select(d => new BookingDetailResponse
-                {
-                    Nights = d.Nights,
-                    Price = d.Price,
-                    Room = new RoomResponse
-                    {
-                        RoomId = d.Room.RoomId,
-                        RoomNumber = d.Room.RoomNumber,
-                        Type = d.Room.RoomType,
-                        PricePerNight = d.Room.PricePerNight,
-                        Capacity = d.Room.Capacity,
-                        IsAvailable = d.Room.IsAvailable
-                    }
-                }).ToList(),
-                Payments = b.Payments.Select(p => new PaymentResponse
-                {
-                    PaymentId = p.PaymentId,
-                    Amount = p.Amount,
-                    PaymentDate = p.PaymentDate,
-                    PaymentMethod = p.PaymentMethod,
-                    Status = p.Status
-                }).ToList(),
-                ExtraServices = b.BookingServices.Select(s => new BookingServiceResponse
-                {
-                    TotalPrice = s.TotalPrice,
-                    Quantity = s.Quantity,
-                    ExtraService = new ExtraServiceResponse
-                    {
-                        ExtraServiceId = s.ExtraService.ExtraServiceId,
-                        Name = s.ExtraService.Name,
-                        Description = s.ExtraService.Description,
-                        Price = s.ExtraService.Price
-                    }
-                }).ToList()
-            }).ToList();
+            var items = bookings.Select(b => new BookingResponse(b)).ToList();
 
             return new PagedResponse<BookingResponse>
             {
@@ -87,58 +39,7 @@ namespace HotelReservationSystem.Application.Services
             if (b is null)
                 return null;
 
-            var bookingResponse = new BookingResponse
-            {
-                BookingId = b.BookingId,
-                BookingDate = b.BookingDate,
-                StartDate = b.StartDate,
-                EndDate = b.EndDate,
-                Status = b.Status,
-                Customer = new CustomerResponse
-                {
-                    CustomerId = b.Customer.CustomerId,
-                    FirstName = b.Customer.FirstName,
-                    LastName = b.Customer.LastName,
-                    Email = b.Customer.Email,
-                    PhoneNumber = b.Customer.PhoneNumber
-                },
-                BookingDetails = b.BookingDetails.Select(d => new BookingDetailResponse
-                {
-                    Nights = d.Nights,
-                    Price = d.Price,
-                    Room = new RoomResponse
-                    {
-                        RoomId = d.Room.RoomId,
-                        RoomNumber = d.Room.RoomNumber,
-                        Type = d.Room.RoomType,
-                        PricePerNight = d.Room.PricePerNight,
-                        Capacity = d.Room.Capacity,
-                        IsAvailable = d.Room.IsAvailable
-                    }
-                }).ToList(),
-                Payments = b.Payments.Select(p => new PaymentResponse
-                {
-                    PaymentId = p.PaymentId,
-                    Amount = p.Amount,
-                    PaymentDate = p.PaymentDate,
-                    PaymentMethod = p.PaymentMethod,
-                    Status = p.Status
-                }).ToList(),
-                ExtraServices = b.BookingServices.Select(s => new BookingServiceResponse
-                {
-                    TotalPrice = s.TotalPrice,
-                    Quantity = s.Quantity,
-                    ExtraService = new ExtraServiceResponse
-                    {
-                        ExtraServiceId = s.ExtraService.ExtraServiceId,
-                        Name = s.ExtraService.Name,
-                        Description = s.ExtraService.Description,
-                        Price = s.ExtraService.Price
-                    }
-                }).ToList()
-            };
-
-            return bookingResponse;
+            return new BookingResponse(b);
         }
 
         public async Task<Booking> AddAsync(CreateBookingRequest request)
@@ -173,14 +74,14 @@ namespace HotelReservationSystem.Application.Services
             return createdBooking;
         }
 
-        public async Task<Booking?> UpdateAsync(int id, UpdateBookingRequest request)
+        public async Task<BookingResponse?> UpdateAsync(int id, UpdateBookingRequest request)
         {
-            var BookingToUpdate = await _bookingRepository.GetByIdAsync(id);
-            if (BookingToUpdate == null)
-                return null;
+            var bookingToUpdate = await _bookingRepository.GetByIdAsync(id);
+            if (bookingToUpdate == null)
+                throw new KeyNotFoundException("Booking not found.");
 
             if (!string.IsNullOrWhiteSpace(request.Status))
-                BookingToUpdate.Status = request.Status;
+                bookingToUpdate.Status = request.Status;
 
 
             if (request.StartDate < DateTime.UtcNow)
@@ -195,18 +96,18 @@ namespace HotelReservationSystem.Application.Services
 
             if (request.StartDate < request.EndDate)
             {
-                BookingToUpdate.StartDate = request.StartDate;
-                BookingToUpdate.EndDate = request.EndDate;
+                bookingToUpdate.StartDate = request.StartDate;
+                bookingToUpdate.EndDate = request.EndDate;
             }
             else
             {
                 throw new InvalidOperationException("Start date must be earlier than end date.");
             }
 
-            var udpated = await _bookingRepository.UpdateAsync(BookingToUpdate);
+            var updated = await _bookingRepository.UpdateAsync(bookingToUpdate);
             await _bookingRepository.SaveChangesAsync();
 
-            return udpated;
+            return new BookingResponse(updated);
         }
 
         public async Task DeleteAsync(int id)

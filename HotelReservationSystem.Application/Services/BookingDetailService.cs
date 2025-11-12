@@ -28,29 +28,7 @@ namespace HotelReservationSystem.Application.Services
 
             var bookingDetails = await _bookingDetailRepository.GetAllAsync(page, pageSize);
 
-            var items = bookingDetails.Select(b => new BookingDetailResponse
-            {
-                BookingDetailId = b.BookingDetailId,
-                Price = b.Price,
-                Nights = b.Nights,
-                Booking = new BookingResponse
-                {
-                    BookingId = b.Booking.BookingId,
-                    BookingDate = b.Booking.BookingDate,
-                    StartDate = b.Booking.StartDate,
-                    EndDate = b.Booking.EndDate,
-                    Status = b.Booking.Status
-                },
-                Room = new DTOs.Rooms.RoomResponse
-                {
-                    RoomId = b.Room.RoomId,
-                    RoomNumber = b.Room.RoomNumber,
-                    Type = b.Room.RoomType,
-                    PricePerNight = b.Room.PricePerNight,
-                    Capacity = b.Room.Capacity,
-                    IsAvailable = b.Room.IsAvailable
-                } 
-            }).ToList();
+            var items = bookingDetails.Select(b => new BookingDetailResponse(b)).ToList();
 
             return new PagedResponse<BookingDetailResponse>
             {
@@ -67,30 +45,7 @@ namespace HotelReservationSystem.Application.Services
             if (b is null)
                 return null;
 
-            return new BookingDetailResponse
-            {
-                BookingDetailId = b.BookingDetailId,
-                Price = b.Price,
-                Nights = b.Nights,
-                Booking = new BookingResponse
-                {
-                    BookingId = b.Booking.BookingId,
-                    CustomerId = b.Booking.Customer.CustomerId,
-                    BookingDate = b.Booking.BookingDate,
-                    StartDate = b.Booking.StartDate,
-                    EndDate = b.Booking.EndDate,
-                    Status = b.Booking.Status,
-                },
-                Room = new DTOs.Rooms.RoomResponse
-                {
-                    RoomId = b.Room.RoomId,
-                    RoomNumber = b.Room.RoomNumber,
-                    Type = b.Room.RoomType,
-                    PricePerNight = b.Room.PricePerNight,
-                    Capacity = b.Room.Capacity,
-                    IsAvailable = b.Room.IsAvailable
-                }
-            };
+            return new BookingDetailResponse(b);            
         }
 
         public async Task<BookingDetail> AddAsync(CreateBookingDetailRequest request)
@@ -116,7 +71,7 @@ namespace HotelReservationSystem.Application.Services
             return created;
         }
 
-        public async Task<BookingDetail?> UpdateAsync(int id, UpdateBookingDetailRequest request)
+        public async Task<BookingDetailResponse?> UpdateAsync(int id, UpdateBookingDetailRequest request)
         {
             var existing = await _bookingDetailRepository.GetByIdAsync(id);
             if (existing is null)
@@ -137,10 +92,10 @@ namespace HotelReservationSystem.Application.Services
             if (request.Nights.HasValue)
                 existing.Nights = request.Nights.Value;
 
-            var updated = await _bookingDetailRepository.UpdateAsync(existing);
+            var b = await _bookingDetailRepository.UpdateAsync(existing);
             await _bookingDetailRepository.SaveChangesAsync();
 
-            return updated;
+            return new BookingDetailResponse(b);
         }
 
         public async Task DeleteAsync(int id)

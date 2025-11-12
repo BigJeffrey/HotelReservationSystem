@@ -1,4 +1,6 @@
-﻿namespace HotelReservationSystem.Application.DTOs.BookingServices
+﻿using HotelReservationSystem.Domain.Entities;
+
+namespace HotelReservationSystem.Application.DTOs.BookingServices
 {
     public class BookingServiceResponse
     {
@@ -7,6 +9,32 @@
         public decimal TotalPrice { get; set; }
         public ExtraServiceResponse ExtraService { get; set; } = new();
         public BookingResponse? Booking { get; set; }
+
+        public BookingServiceResponse(BookingServiceEntity bs)
+        {
+            BookingServiceId = bs.BookingServiceId;
+            Quantity = bs.Quantity;
+            TotalPrice = bs.TotalPrice;
+            ExtraService = new ExtraServiceResponse
+            {
+                ExtraServiceId = bs.ExtraService.ExtraServiceId,
+                Name = bs.ExtraService.Name,
+                Description = bs.ExtraService.Description,
+                Price = bs.ExtraService.Price
+            };
+            if (bs.Booking is not null)
+            {
+                Booking = new BookingResponse
+                {
+                    BookingId = bs.Booking.BookingId,
+                    CustomerId = bs.Booking.CustomerId,
+                    BookingDate = bs.Booking.BookingDate,
+                    StartDate = bs.Booking.StartDate,
+                    EndDate = bs.Booking.EndDate,
+                    Status = bs.Booking.Status
+                };
+            }
+        }
     }
 
     public class BookingResponse

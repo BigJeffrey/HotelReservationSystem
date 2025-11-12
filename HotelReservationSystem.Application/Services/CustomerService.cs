@@ -21,22 +21,7 @@ namespace HotelReservationSystem.Application.Services
 
             var customers = await _customerRepository.GetAllAsync(page, pageSize);
 
-            var items = customers.Select(c => new CustomerResponse
-            {
-                CustomerId = c.CustomerId,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Email = c.Email,
-                PhoneNumber = c.PhoneNumber,
-                Bookings = c.Bookings.Select(b => new BookingsResponse
-                {
-                    BookingId = b.BookingId,
-                    BookingDate = b.BookingDate,
-                    StartDate = b.StartDate,
-                    EndDate = b.EndDate,
-                    Status = b.Status
-                }).ToList()
-            }).ToList();
+            var items = customers.Select(c => new CustomerResponse(c)).ToList();
 
             return new PagedResponse<CustomerResponse>
             {
@@ -53,22 +38,7 @@ namespace HotelReservationSystem.Application.Services
             if (c == null)
                 return null;
 
-            return new CustomerResponse
-            {
-                CustomerId = c.CustomerId,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Email = c.Email,
-                PhoneNumber = c.PhoneNumber,
-                Bookings = c.Bookings.Select(b => new BookingsResponse
-                {
-                    BookingId = b.BookingId,
-                    BookingDate = b.BookingDate,
-                    StartDate = b.StartDate,
-                    EndDate = b.EndDate,
-                    Status = b.Status
-                }).ToList()
-            };
+            return new CustomerResponse(c);
         }
 
         public async Task<Customer?> GetByEmailAsync(string email)
@@ -96,7 +66,7 @@ namespace HotelReservationSystem.Application.Services
             return createdCustomer;
         }
 
-        public async Task<Customer?> UpdateAsync(int id, UpdateCustomerRequest request)
+        public async Task<CustomerResponse?> UpdateAsync(int id, UpdateCustomerRequest request)
         {
             var customerToUpdate = await _customerRepository.GetByIdAsync(id);
             if (customerToUpdate == null)
@@ -121,10 +91,10 @@ namespace HotelReservationSystem.Application.Services
             if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
                 customerToUpdate.PhoneNumber = request.PhoneNumber;
 
-            var udpated = await _customerRepository.UpdateAsync(customerToUpdate);
+            var c = await _customerRepository.UpdateAsync(customerToUpdate);
             await _customerRepository.SaveChangesAsync();
 
-            return udpated;
+            return new CustomerResponse(c);
         }
 
         public async Task DeleteAsync(int id)
