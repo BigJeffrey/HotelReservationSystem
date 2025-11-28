@@ -1,4 +1,7 @@
-﻿public class ExceptionHandlingMiddleware
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
+
+public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
@@ -15,6 +18,26 @@
         {
             await _next(context);
         }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+        {
+            context.Response.StatusCode = pgEx.SqlState switch
+            {
+                "23503" => StatusCodes.Status400BadRequest,
+                "23505" => StatusCodes.Status409Conflict,
+                _ => StatusCodes.Status400BadRequest
+            };
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                message = pgEx.SqlState switch
+                {
+                    "23503" => "Invalid reference: related entity not found.",
+                    "23505" => "Duplicate value violates a unique constraint.",
+                    _ => "A database constraint was violated."
+                },
+                constraint = pgEx.ConstraintName
+            });
+        }
         catch (InvalidOperationException ex)
         {
             context.Response.StatusCode = StatusCodes.Status409Conflict;
@@ -23,6 +46,11 @@
         catch (KeyNotFoundException ex)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(new { message = ex.Message });
         }
         catch (Exception ex)

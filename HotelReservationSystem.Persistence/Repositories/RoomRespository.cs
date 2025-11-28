@@ -22,6 +22,32 @@ namespace HotelReservationSystem.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountAvailableRoomsAsync(DateTime checkInDate, DateTime checkOutDate)
+        {
+            var bookedRoomIdsQuery = GetBookedRoomIdsQuery(checkInDate, checkOutDate);
+
+            return await _context.Rooms
+                .AsNoTracking()
+                .Where(r => !bookedRoomIdsQuery.Contains(r.RoomId))
+                .CountAsync();
+        }
+
+        // Retrieves rooms that are available between the specified check-in and check-out dates
+        public async Task<IEnumerable<Room>> GetAvailableRoomsAsync(DateTime checkInDate, DateTime checkOutDate, int page, int pageSize)
+        {
+            var bookedRoomIdsQuery = GetBookedRoomIdsQuery(checkInDate, checkOutDate);
+
+            // Select available rooms, apply pagination, and execute the query
+            var availableRooms = await _context.Rooms
+                .AsNoTracking()
+                .Where(r => !bookedRoomIdsQuery.Contains(r.RoomId))
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return availableRooms;
+        }
+
         public async Task<Room?> GetByIdAsync(int id)
         {
             return await _context.Rooms.AsNoTracking()
@@ -59,6 +85,16 @@ namespace HotelReservationSystem.Persistence.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        private IQueryable<int> GetBookedRoomIdsQuery(DateTime checkInDate, DateTime checkOutDate)
+        {
+            return _context.BookingDetails
+                .Where(bd => bd.Booking != null &&
+                             bd.Booking.EndDate > checkInDate &&
+                             bd.Booking.StartDate < checkOutDate)
+                .Select(bd => bd.RoomId)
+                .Distinct();
         }
     }
 }

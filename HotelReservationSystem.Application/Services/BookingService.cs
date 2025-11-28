@@ -3,7 +3,7 @@ using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
-using System.Data.Common;
+using CsvHelper;
 
 namespace HotelReservationSystem.Application.Services
 {
@@ -41,6 +41,37 @@ namespace HotelReservationSystem.Application.Services
 
             return new BookingResponse(b);
         }
+
+        public async Task<byte[]> GetCsvReport()
+        {
+            var bookings = await _bookingRepository.GetAllAsync(1, 10);
+
+            using var memoryStream = new MemoryStream();
+            using (var streamWriter = new StreamWriter(memoryStream, leaveOpen: true))
+            using (var csvWriter = new CsvWriter(streamWriter, System.Globalization.CultureInfo.InvariantCulture))
+            {
+                csvWriter.WriteHeader<BookingCsvRow>();
+                await csvWriter.NextRecordAsync();
+                foreach (var booking in bookings)
+                {
+                    var row = new BookingCsvRow
+                    {
+                        BookingId = booking.BookingId,
+                        BookingDate = booking.BookingDate,
+                        StartDate = booking.StartDate,
+                        EndDate = booking.EndDate,
+                        Status = booking.Status,
+                        CustomerId = booking.Customer.CustomerId,
+                        CustomerName = $"{booking.Customer.FirstName} {booking.Customer.LastName}",
+                        CustomerEmail = booking.Customer.Email
+                    };
+                    csvWriter.WriteRecord(row);
+                    await csvWriter.NextRecordAsync();
+                }
+            }
+            return memoryStream.ToArray();
+        }            
+       
 
         public async Task<Booking> AddAsync(CreateBookingRequest request)
         {

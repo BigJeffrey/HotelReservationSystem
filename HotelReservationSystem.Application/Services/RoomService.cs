@@ -32,6 +32,28 @@ namespace HotelReservationSystem.Application.Services
             };
         }
 
+        public async Task<PagedResponse<RoomResponse>> GetAvailableRoomsAsync(DateTime checkInDate, DateTime checkOutDate, int page, int pageSize)
+        {
+            if (checkOutDate <= checkInDate)
+            {
+                throw new ArgumentException("Check-out date must be after check-in date.");
+            }
+
+            var totalCount = await _roomRepository.CountAvailableRoomsAsync(checkInDate, checkOutDate);
+
+            var rooms = await _roomRepository.GetAvailableRoomsAsync(checkInDate, checkOutDate, page, pageSize);
+
+            var items = rooms.Select(r => new RoomResponse(r)).ToList();
+
+            return new PagedResponse<RoomResponse>
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+        }
+
         public async Task<RoomResponse?> GetByIdAsync(int id)
         {
             var room = await _roomRepository.GetByIdAsync(id);

@@ -21,13 +21,13 @@ namespace HotelReservationSystem.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Mapping tables
-            modelBuilder.Entity<Customer>().ToTable("customers");
-            modelBuilder.Entity<Room>().ToTable("rooms");
-            modelBuilder.Entity<Booking>().ToTable("bookings");
-            modelBuilder.Entity<BookingDetail>().ToTable("booking_details");
-            modelBuilder.Entity<Payment>().ToTable("payments");
-            modelBuilder.Entity<ExtraService>().ToTable("extra_services");
-            modelBuilder.Entity<BookingServiceEntity>().ToTable("booking_services");
+            modelBuilder.Entity<Customer>().ToTable("customer");
+            modelBuilder.Entity<Room>().ToTable("room");
+            modelBuilder.Entity<Booking>().ToTable("booking");
+            modelBuilder.Entity<BookingDetail>().ToTable("booking_detail");
+            modelBuilder.Entity<Payment>().ToTable("payment");
+            modelBuilder.Entity<ExtraService>().ToTable("extra_service");
+            modelBuilder.Entity<BookingServiceEntity>().ToTable("booking_service");
 
             // Mapping columns
             modelBuilder.Entity<Customer>(entity =>

@@ -25,6 +25,13 @@ namespace HotelReservationSystem.Presentation.Controllers
             return booking is null ? NotFound() : Ok(booking);
         }
 
+        [HttpGet("csv")]
+        public async Task<IActionResult> GetCsvReport()
+        {
+            var csvData = await _bookingService.GetCsvReport(); 
+            return File(csvData, "text/csv", "bookings_report.csv");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
         {

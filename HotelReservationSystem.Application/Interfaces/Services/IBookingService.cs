@@ -8,6 +8,7 @@ namespace HotelReservationSystem.Application.Interfaces.Services
     {
         Task<PagedResponse<BookingResponse>> GetAllAsync(int page, int pageSize);
         Task<BookingResponse?> GetByIdAsync(int id);
+        Task<byte[]> GetCsvReport();
         Task<Booking> AddAsync(CreateBookingRequest request);
         Task<BookingResponse?> UpdateAsync(int id, UpdateBookingRequest request);
         Task DeleteAsync(int id);

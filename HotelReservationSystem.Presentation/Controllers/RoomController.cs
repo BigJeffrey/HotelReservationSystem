@@ -17,6 +17,23 @@ namespace HotelReservationSystem.Presentation.Controllers
             return !rooms.Items.Any() ? NotFound() : Ok(rooms);
         }
 
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailableRooms(
+            [FromQuery] DateTime checkInDate,
+            [FromQuery] DateTime checkOutDate,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+
+            var availableRooms = await _roomService.GetAvailableRoomsAsync(checkInDate, checkOutDate, page, pageSize);
+            if (!availableRooms.Items.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(availableRooms);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
