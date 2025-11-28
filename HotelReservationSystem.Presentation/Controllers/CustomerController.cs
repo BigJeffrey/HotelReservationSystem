@@ -55,7 +55,7 @@ namespace HotelReservationSystem.Presentation.Controllers
                 if (updatedCustomer == null)
                     return NotFound();
 
-                return NoContent();
+                return Ok(updatedCustomer);
             }
             catch (InvalidOperationException ex)
             {
