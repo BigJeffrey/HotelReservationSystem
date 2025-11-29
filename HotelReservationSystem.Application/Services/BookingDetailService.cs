@@ -58,12 +58,21 @@ namespace HotelReservationSystem.Application.Services
             if (room is null)
                 throw new InvalidOperationException("Specified room does not exist.");
 
+            var isRoomAvailable = await _roomRepository.IsRoomAvailable(booking.StartDate, booking.EndDate, request.RoomId);
+            if (!isRoomAvailable)
+            {
+                throw new InvalidOperationException("Room is not available.");
+            }
+
+            var nights = booking.EndDate.Subtract(booking.StartDate).Days;
+            var price = room.PricePerNight * nights;
+            
             var bookingDetail = new BookingDetail
             {
                 BookingId = request.BookingId,
                 RoomId = request.RoomId,
-                Price = request.Price,
-                Nights = request.Nights
+                Price = price,
+                Nights = nights
             };
 
             var created = await _bookingDetailRepository.AddAsync(bookingDetail);
@@ -79,9 +88,19 @@ namespace HotelReservationSystem.Application.Services
 
             if (request.RoomId.HasValue)
             {
+                var booking = await _bookingRepository.GetByIdAsync(existing.BookingId);
+                if (booking is null)
+                    throw new InvalidOperationException("Associated booking does not exist.");
+
                 var room = await _roomRepository.GetByIdAsync(request.RoomId.Value);
                 if (room is null)
                     throw new InvalidOperationException("Specified room does not exist.");
+
+                var isRoomAvailable = await _roomRepository.IsRoomAvailable(booking.StartDate, booking.EndDate, request.RoomId.Value);
+                if (!isRoomAvailable)
+                {
+                    throw new InvalidOperationException("Room is not available.");
+                }
 
                 existing.RoomId = request.RoomId.Value;
             }

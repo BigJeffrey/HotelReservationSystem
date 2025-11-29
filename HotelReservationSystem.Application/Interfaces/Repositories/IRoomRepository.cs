@@ -8,6 +8,7 @@ namespace HotelReservationSystem.Application.Interfaces.Repositories
         Task<IEnumerable<Room>> GetAllAsync(int page, int pageSize);
         Task<int> CountAvailableRoomsAsync(DateTime checkInDate, DateTime checkOutDate);
         Task<IEnumerable<Room>> GetAvailableRoomsAsync(DateTime checkInDate, DateTime checkOutDate, int page, int pageSize);
+        Task<Boolean> IsRoomAvailable(DateTime checkInDate, DateTime checkOutDate, int roomId);
         Task<Room?> GetByIdAsync(int id);
         Task<Room?> GetByRoomNumberAsync(string roomNumber);
         Task<Room> AddAsync(Room payment);

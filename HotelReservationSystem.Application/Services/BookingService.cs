@@ -10,10 +10,12 @@ namespace HotelReservationSystem.Application.Services
     public class BookingService : IBookingService
     {
         private readonly IBookingRepository _bookingRepository;
+        private readonly IBookingDetailRepository _bookingDetailRepository;
 
-        public BookingService(IBookingRepository bookingRepository)
+        public BookingService(IBookingRepository bookingRepository, IBookingDetailRepository bookingDetailRepository)
         {
             _bookingRepository = bookingRepository;
+            _bookingDetailRepository = bookingDetailRepository;
         }
 
         public async Task<PagedResponse<BookingResponse>> GetAllAsync(int page, int pageSize)
@@ -111,31 +113,56 @@ namespace HotelReservationSystem.Application.Services
             if (bookingToUpdate == null)
                 throw new KeyNotFoundException("Booking not found.");
 
+            if (request.CustomerId.HasValue)
+                bookingToUpdate.CustomerId = request.CustomerId.Value;
+
             if (!string.IsNullOrWhiteSpace(request.Status))
                 bookingToUpdate.Status = request.Status;
 
-
-            if (request.StartDate < DateTime.UtcNow)
+            if (request.StartDate.HasValue)
             {
-                throw new InvalidOperationException("Start date cannot be in the past.");
+                if (request.StartDate < DateTime.UtcNow)
+                {
+                    throw new InvalidOperationException("Start date cannot be in the past.");
+                }
+                else
+                {
+                    bookingToUpdate.StartDate = request.StartDate.Value;
+                }
             }
 
-            if (request.EndDate < DateTime.UtcNow)
+            if (request.EndDate.HasValue)
             {
-                throw new InvalidOperationException("End date cannot be in the past.");
+                if (request.EndDate < DateTime.UtcNow)
+                {
+                    throw new InvalidOperationException("End date cannot be in the past.");
+                }
+                else
+                {
+                    bookingToUpdate.EndDate = request.EndDate.Value;
+                }
             }
 
-            if (request.StartDate < request.EndDate)
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                bookingToUpdate.StartDate = request.StartDate;
-                bookingToUpdate.EndDate = request.EndDate;
-            }
-            else
-            {
-                throw new InvalidOperationException("Start date must be earlier than end date.");
-            }
+                if (request.StartDate >= request.EndDate)
+                {
+                    throw new InvalidOperationException("Start date must be earlier than end date.");
+                }
 
+                int nights = (request.EndDate.Value - request.StartDate.Value).Days;
+
+                foreach (var detail in bookingToUpdate.BookingDetails)
+                {
+                    detail.Nights = nights;
+                    detail.Price = nights * detail.Room.PricePerNight;
+
+                    await _bookingDetailRepository.UpdateAsync(detail);
+                }
+            }
+            
             var updated = await _bookingRepository.UpdateAsync(bookingToUpdate);
+
             await _bookingRepository.SaveChangesAsync();
 
             return new BookingResponse(updated);

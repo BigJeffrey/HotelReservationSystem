@@ -48,6 +48,14 @@ namespace HotelReservationSystem.Persistence.Repositories
             return availableRooms;
         }
 
+        public async Task<Boolean> IsRoomAvailable(DateTime checkInDate, DateTime checkOutDate, int roomId)
+        {
+            var bookedRoomIdsQuery = GetBookedRoomIdsQuery(checkInDate, checkOutDate);
+            return !await _context.Rooms
+                .AsNoTracking()
+                .AnyAsync(r => bookedRoomIdsQuery.Contains(roomId));
+        }
+
         public async Task<Room?> GetByIdAsync(int id)
         {
             return await _context.Rooms.AsNoTracking()
