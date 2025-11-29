@@ -12,5 +12,6 @@ namespace HotelReservationSystem.Application.Interfaces.Services
         Task<Customer> AddAsync(CreateCustomerRequest customer);
         Task<CustomerResponse?> UpdateAsync(int id, UpdateCustomerRequest customer);
         Task DeleteAsync(int id);
+        Task<CsvImportResult> ImportFromCsvAsync(Stream csvStream);
     }
 }

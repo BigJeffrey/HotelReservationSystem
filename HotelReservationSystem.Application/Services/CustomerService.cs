@@ -1,8 +1,11 @@
-﻿using HotelReservationSystem.Application.DTOs.Common;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using HotelReservationSystem.Application.DTOs.Common;
 using HotelReservationSystem.Application.DTOs.Customers;
 using HotelReservationSystem.Application.Interfaces.Repositories;
 using HotelReservationSystem.Application.Interfaces.Services;
 using HotelReservationSystem.Domain.Entities;
+using System.Globalization;
 
 namespace HotelReservationSystem.Application.Services
 {
@@ -105,6 +108,39 @@ namespace HotelReservationSystem.Application.Services
 
             await _customerRepository.DeleteAsync(id);
             await _customerRepository.SaveChangesAsync();
+        }
+
+        public async Task<CsvImportResult> ImportFromCsvAsync(Stream csvStream)
+        {
+            var result = new CsvImportResult();
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                TrimOptions = TrimOptions.Trim,
+                MissingFieldFound = null
+            };
+
+            using var reader = new StreamReader(csvStream);
+            using var csv = new CsvReader(reader, config);
+
+            var records = csv.GetRecords<CreateCustomerRequest>().ToList();
+
+            foreach (var record in records)
+            {
+                try
+                {
+                    await AddAsync(record);
+                    result.CreatedCount++;
+                }
+                catch (Exception ex)
+                {
+                    result.FailedCount++;
+                    result.Errors.Add($"Error for {record.FirstName} {record.LastName}: {ex.Message}");
+                }
+            }
+
+            return result;
         }
     }
 }

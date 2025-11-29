@@ -73,5 +73,30 @@ namespace HotelReservationSystem.Presentation.Controllers
             await _customerService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportCsv(IFormFile file)
+        {
+            if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+                return BadRequest("Invalid file type. Only CSV allowed.");
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                var result = await _customerService.ImportFromCsvAsync(stream);
+
+                return Ok(new
+                {
+                    message = "CSV import completed.",
+                    result.CreatedCount,
+                    result.FailedCount,
+                    result.Errors
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }
