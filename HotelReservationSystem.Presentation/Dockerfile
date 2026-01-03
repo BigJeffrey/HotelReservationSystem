@@ -12,19 +12,22 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["HotelReservationSystem.csproj", "."]
-RUN dotnet restore "./HotelReservationSystem.csproj"
+COPY ["HotelReservationSystem.Presentation/HotelReservationSystem.Presentation.csproj", "HotelReservationSystem.Presentation/"]
+COPY ["HotelReservationSystem.Application/HotelReservationSystem.Application.csproj", "HotelReservationSystem.Application/"]
+COPY ["HotelReservationSystem.Domain/HotelReservationSystem.Domain.csproj", "HotelReservationSystem.Domain/"]
+COPY ["HotelReservationSystem.Persistence/HotelReservationSystem.Persistence.csproj", "HotelReservationSystem.Persistence/"]
+RUN dotnet restore "./HotelReservationSystem.Presentation/HotelReservationSystem.Presentation.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./HotelReservationSystem.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/HotelReservationSystem.Presentation"
+RUN dotnet build "./HotelReservationSystem.Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./HotelReservationSystem.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./HotelReservationSystem.Presentation.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "HotelReservationSystem.dll"]
+ENTRYPOINT ["dotnet", "HotelReservationSystem.Presentation.dll"]
