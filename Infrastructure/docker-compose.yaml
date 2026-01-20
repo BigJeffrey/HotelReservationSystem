@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: wsizapp
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: wsizapp
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - net
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+    driver: local
+    
+networks:
+  net:
+    driver: bridge
